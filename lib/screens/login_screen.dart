@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String email;
   String password;
   bool isLoggedIn = false;
+  bool remember = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -108,6 +109,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        'Remember me',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.green,
+                        ),
+                      ),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        activeColor: Colors.green,
+                        onChanged: (bool) {
+                          setState(() {
+                            remember = bool;
+                          });
+                        },
+                        value: remember,
+                      ),
+                    ],
+                  ),
+                ),
                 SubmitButton(
                   buttonText: 'Login',
                   fontSize: 30,
@@ -115,7 +141,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (_formKey.currentState.validate()) {
                       bool canLogin = await util.login(email, password);
                       if (canLogin) {
-                        await rememberLogin();
+                        if (remember) {
+                          await rememberLogin();
+                        }
                         Navigator.pushNamed(
                           context,
                           AddRecordScreen.route,
