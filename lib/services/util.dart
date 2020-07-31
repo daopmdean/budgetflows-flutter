@@ -3,9 +3,10 @@ import 'package:budget_flows/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const baseUrl = 'http://localhost:8080/api/flutter';
+//const baseUrl = 'http://localhost:8080/api/flutter';
 //const baseUrl =
 //    'http://localhost:8080/spring-server-api-0.0.1-SNAPSHOT/api/flutter';
+const baseUrl = 'http://188.166.245.183:8080/budgetflows-server/api/flutter';
 
 Future<bool> login(String email, String password) async {
   final url = '$baseUrl/auth/login';

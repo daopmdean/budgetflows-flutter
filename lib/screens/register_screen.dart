@@ -17,95 +17,115 @@ class RegisterScreen extends StatelessWidget {
     String confirm;
     String fullName;
     String phone;
+    final _formkey = GlobalKey<FormState>();
 
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: ListView(
-            children: <Widget>[
-              SizedBox(
-                height: 100,
-              ),
-              InputField(
-                hintText: 'Email',
-                onChanged: (value) {
-                  email = value;
-                },
-              ),
-              InputField(
-                hintText: 'Password',
-                obscureText: true,
-                onChanged: (value) {
-                  password = value;
-                },
-              ),
-              InputField(
-                hintText: 'Confirm',
-                obscureText: true,
-                onChanged: (value) {
-                  confirm = value;
-                },
-              ),
-              InputField(
-                hintText: 'Full name',
-                onChanged: (value) {
-                  fullName = value;
-                },
-              ),
-              InputField(
-                hintText: 'Phone number',
-                onChanged: (value) {
-                  phone = value;
-                },
-              ),
-              SubmitButton(
-                buttonText: 'Register',
-                fontSize: 20,
-                onPressed: () async {
-                  if (email == null || fullName == null || phone == null) {
-                    AlertPopUp.announceRegisterFail(
-                      context,
-                      'Please fill all the information!',
-                    ).show();
-                  }
+          child: Form(
+            key: _formkey,
+            child: ListView(
+              children: <Widget>[
+                SizedBox(
+                  height: 100,
+                ),
+                InputField(
+                  hintText: 'Email',
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  validator: (String value) {
+                    RegExp exp = new RegExp(r"\w+\@\w+\.\w+");
+                    if (!exp.hasMatch(value)) {
+                      return 'Please provide a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                InputField(
+                  hintText: 'Password',
+                  obscureText: true,
+                  onChanged: (value) {
+                    password = value;
+                  },
+                  validator: (String value) {
+                    if (value.isEmpty) {
+                      return 'Please provide password';
+                    }
+                    return null;
+                  },
+                ),
+                InputField(
+                  hintText: 'Confirm',
+                  obscureText: true,
+                  onChanged: (value) {
+                    confirm = value;
+                  },
+                  validator: (String value) {
+                    if (confirm != password) {
+                      return 'Confirm must match password';
+                    }
+                    if (value.isEmpty) {
+                      return '';
+                    }
 
-                  if (email.trim() == '' ||
-                      fullName.trim() == '' ||
-                      phone.trim() == '') {
-                    AlertPopUp.announceRegisterFail(
-                      context,
-                      'Please fill all the information!',
-                    ).show();
-                  }
-                  if (password != confirm) {
-                    AlertPopUp.announceRegisterFail(
-                      context,
-                      'Confirm must match password',
-                    ).show();
-                    return;
-                  }
-                  User newUser = User(
-                    email: email,
-                    password: password,
-                    fullName: fullName,
-                    phone: phone,
-                  );
-                  bool canRegister = await util.register(newUser);
-                  if (canRegister) {
-                    Navigator.pushNamed(
-                      context,
-                      AddRecordScreen.route,
-                      arguments: AppArguments(email),
-                    );
-                  } else {
-                    AlertPopUp.announceRegisterFail(
-                      context,
-                      'Email already exist!',
-                    ).show();
-                  }
-                },
-              ),
-            ],
+                    return null;
+                  },
+                ),
+                InputField(
+                  hintText: 'Full name',
+                  onChanged: (value) {
+                    fullName = value;
+                  },
+                  validator: (String value) {
+                    if (value.isEmpty) {
+                      return 'Please enter your fullname';
+                    }
+                    return null;
+                  },
+                ),
+                InputField(
+                  hintText: 'Phone number',
+                  onChanged: (value) {
+                    phone = value;
+                  },
+                  validator: (String value) {
+                    RegExp exp = new RegExp(r"^0\d{9}$");
+                    if (!exp.hasMatch(value)) {
+                      return 'Please provide a valid phone number';
+                    }
+                    return null;
+                  },
+                ),
+                SubmitButton(
+                  buttonText: 'Register',
+                  fontSize: 20,
+                  onPressed: () async {
+                    if (_formkey.currentState.validate()) {
+                      User newUser = User(
+                        email: email,
+                        password: password,
+                        fullName: fullName,
+                        phone: phone,
+                      );
+                      bool canRegister = await util.register(newUser);
+                      if (canRegister) {
+                        Navigator.pushNamed(
+                          context,
+                          AddRecordScreen.route,
+                          arguments: AppArguments(email),
+                        );
+                      } else {
+                        AlertPopUp.announceRegisterFail(
+                          context,
+                          'Email already exist!',
+                        ).show();
+                      }
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

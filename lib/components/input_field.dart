@@ -1,3 +1,4 @@
+import 'package:budget_flows/constants.dart';
 import 'package:flutter/material.dart';
 
 class InputField extends StatelessWidget {
@@ -6,13 +7,15 @@ class InputField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final TextEditingController controller;
+  final Function validator;
 
   const InputField(
       {@required this.hintText,
       @required this.onChanged,
       this.obscureText,
       this.keyboardType,
-      this.controller});
+      this.controller,
+      this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class InputField extends StatelessWidget {
         top: 5,
         bottom: 5,
       ),
-      child: TextField(
+      child: TextFormField(
         textAlign: TextAlign.center,
         obscureText: obscureText ?? false,
         keyboardType: keyboardType,
@@ -33,21 +36,13 @@ class InputField extends StatelessWidget {
           hintStyle: TextStyle(
             fontSize: 18,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(15),
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
-            borderRadius: BorderRadius.all(Radius.circular(32.0)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.green, width: 2.0),
-            borderRadius: BorderRadius.all(Radius.circular(32.0)),
-          ),
+          enabledBorder: kEnabledBorder,
+          focusedBorder: kFocusedBorder,
+          errorBorder: kErrorBorder,
+          focusedErrorBorder: kFocusedErrorBorder,
         ),
         onChanged: onChanged,
+        validator: validator,
       ),
     );
   }

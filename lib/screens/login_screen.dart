@@ -6,76 +6,136 @@ import 'package:budget_flows/services/alert.dart';
 import 'package:budget_flows/services/arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:budget_flows/services/util.dart' as util;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const route = 'login';
 
   @override
-  Widget build(BuildContext context) {
-    String email;
-    String password;
+  _LoginScreenState createState() => _LoginScreenState();
+}
 
+class _LoginScreenState extends State<LoginScreen> {
+  String email;
+  String password;
+  bool isLoggedIn = false;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    autoLogin();
+  }
+
+  void autoLogin() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    email = prefs.getString('autoLoginEmail');
+
+    if (email != null) {
+      setState(() {
+        isLoggedIn = true;
+      });
+      Navigator.pushNamed(
+        context,
+        AddRecordScreen.route,
+        arguments: AppArguments(email),
+      );
+    }
+  }
+
+  Future rememberLogin() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('autoLoginEmail', email);
+
+    setState(() {
+      isLoggedIn = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Budget flows',
-                style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 50,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Pacifico',
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Budget flows',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 50,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Pacifico',
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 25,
-              ),
-              InputField(
-                keyboardType: TextInputType.emailAddress,
-                hintText: 'Email',
-                onChanged: (value) {
-                  email = value;
-                },
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              InputField(
-                keyboardType: TextInputType.emailAddress,
-                hintText: 'Password',
-                obscureText: true,
-                onChanged: (value) {
-                  password = value;
-                },
-              ),
-              SubmitButton(
-                buttonText: 'Login',
-                fontSize: 30,
-                onPressed: () async {
-                  bool canLogin = await util.login(email, password);
-                  if (canLogin) {
-                    Navigator.pushNamed(
-                      context,
-                      AddRecordScreen.route,
-                      arguments: AppArguments(email),
-                    );
-                  } else {
-                    print('Fail to login');
-                    AlertPopUp.announceLoginFail(context).show();
-                  }
-                },
-              ),
-              SubmitButton(
-                buttonText: 'Register',
-                fontSize: 20,
-                onPressed: () {
-                  Navigator.pushNamed(context, RegisterScreen.route);
-                },
-              ),
-            ],
+                SizedBox(
+                  height: 25,
+                ),
+                InputField(
+                  keyboardType: TextInputType.emailAddress,
+                  hintText: 'Email',
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  validator: (String value) {
+                    if (value.isEmpty) {
+                      return 'Please provide email';
+                    }
+                    RegExp exp = new RegExp(r"\w+\@\w+\.\w+");
+                    if (!exp.hasMatch(value)) {
+                      return 'Please provide a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                InputField(
+                  keyboardType: TextInputType.emailAddress,
+                  hintText: 'Password',
+                  obscureText: true,
+                  onChanged: (value) {
+                    password = value;
+                  },
+                  validator: (String value) {
+                    if (value.isEmpty) {
+                      return 'Please provide password';
+                    }
+                    return null;
+                  },
+                ),
+                SubmitButton(
+                  buttonText: 'Login',
+                  fontSize: 30,
+                  onPressed: () async {
+                    if (_formKey.currentState.validate()) {
+                      bool canLogin = await util.login(email, password);
+                      if (canLogin) {
+                        await rememberLogin();
+                        Navigator.pushNamed(
+                          context,
+                          AddRecordScreen.route,
+                          arguments: AppArguments(email),
+                        );
+                      } else {
+                        AlertPopUp.announceLoginFail(context).show();
+                      }
+                    }
+                  },
+                ),
+                SubmitButton(
+                  buttonText: 'Register',
+                  fontSize: 20,
+                  onPressed: () {
+                    Navigator.pushNamed(context, RegisterScreen.route);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

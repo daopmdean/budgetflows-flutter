@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:budget_flows/components/input_field.dart';
 import 'package:budget_flows/components/submit_button.dart';
 import 'package:budget_flows/models/record.dart';
@@ -7,9 +9,26 @@ import 'package:budget_flows/services/arguments.dart';
 
 import 'package:flutter/material.dart';
 import 'package:budget_flows/services/util.dart' as util;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AddRecordScreen extends StatelessWidget {
+class AddRecordScreen extends StatefulWidget {
   static final String route = 'add_record';
+
+  @override
+  _AddRecordScreenState createState() => _AddRecordScreenState();
+}
+
+class _AddRecordScreenState extends State<AddRecordScreen> {
+  @override
+  void deactivate() {
+    super.deactivate();
+    logout();
+  }
+
+  void logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('autoLoginEmail', null);
+  }
 
   @override
   Widget build(BuildContext context) {
